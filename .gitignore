@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# The book itself (do NOT commit copyrighted material)
+# ---------------------------------------------------------------------------
+*.pdf
+*.epub
+*.mobi
+*.djvu
+*.azw
+*.azw3
+*.chm
+book/
+books/
+The-Linux-Programming-Interface*
+tlpi-book*
+
+# ---------------------------------------------------------------------------
+# Compiled C / object files / binaries
+# ---------------------------------------------------------------------------
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.la
+*.lo
+*.lib
+*.dll
+*.exe
+*.out
+a.out
+*.gch
+*.pch
+
+# Debug / profiling
+*.dSYM/
+*.su
+*.idb
+*.pdb
+core
+core.*
+vgcore.*
+perf.data
+perf.data.old
+gmon.out
+*.gcno
+*.gcda
+*.gcov
+
+# ---------------------------------------------------------------------------
+# Build directories
+# ---------------------------------------------------------------------------
+build/
+bin/
+obj/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+
+# ---------------------------------------------------------------------------
+# Editor / IDE / OS
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
