@@ -253,6 +253,26 @@ idea here is expanded in later chapters.
 
 ---
 
+## 2.12 Threads
+- A process can have multiple **threads** of execution. Think of threads as a set of "processes" that **share the same virtual memory** (and other attributes).
+- All threads of a process run the **same program code** and **share the same data segment and heap** - so they can access the same **global variables**. But **each thread has its own stack** (its own local variables and function-call linkage).
+- Threads communicate easily via those **shared global variables**. The threading API also provides **mutexes** and **condition variables** - primitives to synchronize threads, especially their access to shared variables. (Threads can also use the IPC mechanisms from 2.10.)
+- Advantages of threads:
+  - easy **data sharing** between cooperating threads (via globals);
+  - some algorithms map more naturally to a multithreaded design than a multiprocess one;
+  - a multithreaded program can **transparently exploit parallelism** on multiprocessor (multi-core) hardware.
+
+---
+
+## 2.13 Process Groups and Shell Job Control
+- Each command the shell runs starts in a new process; a **pipeline** creates several at once - e.g. `ls -l | sort -k5n | less` creates **three** processes.
+- All major shells (except the original Bourne shell) provide **job control**: an interactive feature to run and manage multiple commands/pipelines simultaneously.
+- In job-control shells, all processes of a pipeline are placed in a **process group** (a **job**). A single command becomes a process group of one process.
+- Every process in a process group shares the same **process group ID**, which equals the PID of one member - the **process group leader**.
+- The kernel can act on **all members of a process group at once** - notably **delivering a signal** to the whole group. Job-control shells use this to suspend/resume an entire pipeline. (This underpins the foreground/background job behavior in 2.14.)
+
+---
+
 ## 2.14 Sessions, Controlling Terminals, and Controlling Processes
 - Hierarchy: a **session** is a collection of **process groups (jobs)**, and each process group is a set of processes. (**session > process groups > processes**.)
 - All processes in a session share a **session ID**. The **session leader** is the process that created the session; its PID becomes the session ID. Usually the **login shell** is the session leader.
@@ -272,6 +292,48 @@ idea here is expanded in later chapters.
 - Data flow: what the driver writes to the master goes through the **usual terminal input processing** (e.g. carriage-return -> newline) and arrives as input to the program on the slave; what the slave program writes goes through terminal **output processing** and arrives as input to the driver.
 - Uses: **terminal emulator windows** (xterm, GUI/IDE terminals) and **network login services** like **`telnet`** and **`ssh`**.
 - Tie-in: the `/dev/pts/N` device behind a controlling terminal (2.14) is literally a **p**seudo**t**erminal **s**lave; real consoles are `/dev/ttyN`.
+
+---
+
+## 2.16 Date and Time
+- Two kinds of time matter to a process:
+  - **Real time** - either **calendar time** (measured from a standard point) or **elapsed / wall-clock time** (measured from a fixed point, usually the process's start). On UNIX, calendar time is counted in **seconds since the Epoch** = 00:00 UTC on **1 January 1970**.
+  - **Process time (CPU time)** - the total CPU time a process has used since it started, split into:
+    - **system CPU time** - time spent in **kernel mode** (running system calls / kernel services for the process), and
+    - **user CPU time** - time spent in **user mode** (running the program's own code).
+- The **`time`** command shows the real time, system CPU time, and user CPU time used by a pipeline.
+- Terminology: "**real time**" (two words) = the calendar/elapsed-time concept; "**realtime**" (one word) = the responsiveness idea in 2.18.
+
+---
+
+## 2.17 Client-Server Architecture
+- A **client-server application** is split into two cooperating processes:
+  - a **client** - sends a **request** message asking the server for some service;
+  - a **server** - examines the request, does the work, and sends a **response** back.
+  - They may exchange an extended back-and-forth dialogue of requests/responses.
+- Typically the **client interacts with a user**, while the **server manages a shared resource**. Often **many clients** talk to **one (or a few) server(s)**.
+- Client and server may be on the **same host** or on **different hosts over a network**; they communicate using the **IPC mechanisms** from 2.10.
+- Example services: database access, remote file access, encapsulated business logic, shared hardware (e.g. a printer), serving web pages.
+- Why encapsulate a service in a single server?
+  - **Efficiency** - one managed instance of a resource (e.g. a printer) rather than one per computer.
+  - **Control, coordination, security** - a single location can coordinate access (stop two clients updating the same data at once) and restrict it to authorized clients.
+  - **Heterogeneous environments** - clients and server can run on different hardware/OS platforms.
+
+---
+
+## 2.18 Realtime
+- **Realtime applications** must respond to input within a **guaranteed deadline** after a triggering event. Input often comes from a sensor/specialized device, and output controls external hardware. Examples: automated assembly lines, bank ATMs, aircraft navigation.
+- The defining trait is **not raw speed** but the **guarantee** that the response arrives within a set deadline.
+- Realtime responsiveness needs **OS support**, which can conflict with the goals of general multiuser time-sharing systems - so most OSes (including traditional UNIX) aren't realtime. Realtime variants of UNIX and Linux exist, and modern Linux is moving toward fuller native realtime support.
+- **POSIX.1b** defined realtime extensions to POSIX.1: asynchronous I/O, shared memory, memory-mapped files, memory locking, realtime clocks/timers, alternative scheduling policies, realtime signals, message queues, and semaphores. Most UNIX systems now support some/all of these. (The book covers those Linux supports.)
+
+---
+
+## 2.19 The /proc File System
+- **`/proc`** is a **virtual file system**: directories/files under `/proc` that don't exist on disk but present **kernel data structures as if they were files/directories**.
+- It gives an easy, text-based way to **view and change system attributes** - just read/write normal-looking files (usually human-readable text, parseable by shell scripts).
+- **`/proc/PID`** directories (one per running process, named by its PID) expose information about each process.
+- Modifying most `/proc` files requires **privilege**. `/proc` is **not specified by any standard** - it's **Linux-specific** (more in Section 12.1).
 
 ---
 
